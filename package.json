@@ -1,8 +1,8 @@
 {
-  "name": "path_tree",
+  "name": "directory_tree",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://DYC-DD.github.io/path_tree",
+  "homepage": "https://DYC-DD.github.io/Directory_tree",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
