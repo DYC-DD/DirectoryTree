@@ -1,0 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap");
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  padding: 2em 12em;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #212121;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+h1 {
+  margin-bottom: 2.5em;
+  color: #ececec;
+  text-align: center;
+}
+
+.checkbox {
+  margin-bottom: 2em;
+  font-size: 16px;
+  color: #ececec;
+  text-align: center;
+  display: block;
+}
+
+.drop-zone {
+  border: 2px dashed #e0e0e0;
+  padding: 5em;
+  text-align: center;
+  background: #212121;
+  margin-bottom: 1em;
+  border-radius: 10px;
+  transition: border-color 0.3s;
+  color: #ececec;
+}
+
+.drop-zone:hover {
+  border-color: #00aaff;
+  color: #00aaff;
+}
+
+/* 輸出區主體外框 */
+.output-container {
+  background: #181618;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #444;
+}
+
+/* 標題列 */
+.output-header {
+  background: #302e30;
+  color: #ccc;
+  padding: 0.8em 1.2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5em;
+}
+
+.output {
+  color: #00ffaa;
+  padding: 1em;
+  white-space: pre;
+  overflow-x: auto;
+  word-break: normal;
+  font-family: "Fira Code", monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+}
+
+.output-header button {
+  all: unset;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 0.5em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  transition: color 0.2s ease;
+}
+
+.output-header .icon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  filter: brightness(0) invert(75%);
+  transition: filter 0.2s ease;
+}
+
+.output-header button:hover {
+  color: #fff;
+}
+
+.output-header button:hover .icon {
+  filter: brightness(0) invert(100%);
+}
