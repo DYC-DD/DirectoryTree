@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import "../styles/Home.css";
 
 function Home() {
-  const [markdown, setMarkdown] = useState("拖曳資料夾或點選區塊選擇資料夾");
+  const [markdown, setMarkdown] = useState("");
   const [hideDotfiles, setHideDotfiles] = useState(false);
   const textRef = useRef(null);
   const fileInputRef = useRef(null);

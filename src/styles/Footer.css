@@ -28,3 +28,12 @@ body.footer-pull main {
   text-align: center;
   font-weight: 600;
 }
+
+.animated-footer a {
+  text-decoration: none;
+  color: #3b62cf;
+}
+
+.animated-footer a:hover {
+  text-decoration: underline;
+}
