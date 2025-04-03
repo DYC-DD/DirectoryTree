@@ -1,0 +1,30 @@
+@import url("https://fonts.googleapis.com/css?family=Ubuntu+Mono:700");
+
+body {
+  position: relative;
+  margin: 0;
+  font: 100%/1 system-ui;
+  background: #fff;
+  font-family: "Ubuntu Mono", sans-serif;
+}
+
+main {
+  transition: 0.4s ease-in-out;
+}
+
+body.footer-pull main {
+  transform: translateY(-300px) scale(0.95);
+  transform-origin: bottom center;
+  box-shadow: 0 2rem 2rem rgba(0, 0, 0, 0.5);
+}
+
+.animated-footer {
+  position: relative;
+  width: 100%;
+  padding: 2rem 2rem 1rem 2rem;
+  background: rgb(255, 255, 255);
+  color: rgb(82, 82, 82);
+  font-size: 18px;
+  text-align: center;
+  font-weight: 600;
+}
