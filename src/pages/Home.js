@@ -4,24 +4,46 @@ import PixelCard from "../components/PixelCard/PixelCard";
 
 function Home() {
   const [markdown, setMarkdown] = useState("");
-  const [hideDotfiles, setHideDotfiles] = useState(false);
   const [files, setFiles] = useState([]);
+  const [excludedItems, setExcludedItems] = useState({
+    ".git": false,
+    ".DS_Store": false,
+    node_modules: false,
+  });
+  const [customExcludesExact, setCustomExcludesExact] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const [allNames, setAllNames] = useState([]);
+  const [highlightIndex, setHighlightIndex] = useState(-1);
+
   const textRef = useRef(null);
   const fileInputRef = useRef(null);
   const [rootFolderName, setRootFolderName] = useState("directory_tree");
 
   useEffect(() => {
     if (files.length > 0) {
-      const filteredFiles = hideDotfiles
-        ? files.filter((file) => {
-            const parts = file.path.split("/");
-            return !parts.some((part) => part.startsWith("."));
-          })
-        : files;
+      const uniqueNames = new Set();
+      files.forEach((file) => {
+        const parts = file.path.split("/");
+        parts.forEach((p) => uniqueNames.add(p));
+      });
+      setAllNames(Array.from(uniqueNames));
+
+      const activeExcludes = [
+        ...Object.entries(excludedItems)
+          .filter(([_, isActive]) => isActive)
+          .map(([item]) => item),
+        ...customExcludesExact,
+      ];
+
+      const filteredFiles = files.filter((file) => {
+        const parts = file.path.split("/");
+        return !parts.some((part) => activeExcludes.includes(part));
+      });
+
       processFiles(filteredFiles);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hideDotfiles, files]);
+  }, [excludedItems, customExcludesExact, files]);
 
   const handleDrop = async (e) => {
     e.preventDefault();
@@ -33,11 +55,10 @@ function Home() {
     for (let i = 0; i < items.length; i++) {
       const item = items[i].webkitGetAsEntry();
       if (item) {
-        await traverseFileTree(item, "", filesArray, hideDotfiles);
+        await traverseFileTree(item, "", filesArray);
       }
     }
     setFiles(filesArray);
-    processFiles(filesArray);
   };
 
   const handleFileSelect = async (e) => {
@@ -46,7 +67,25 @@ function Home() {
       path: file.webkitRelativePath,
     }));
     setFiles(filesArray);
-    processFiles(filesArray);
+  };
+
+  const traverseFileTree = async (item, path, result) => {
+    return new Promise((resolve) => {
+      if (item.isFile) {
+        item.file((file) => {
+          result.push({ path: path + file.name });
+          resolve();
+        });
+      } else if (item.isDirectory) {
+        const dirReader = item.createReader();
+        dirReader.readEntries(async (entries) => {
+          for (const entry of entries) {
+            await traverseFileTree(entry, path + item.name + "/", result);
+          }
+          resolve();
+        });
+      }
+    });
   };
 
   const processFiles = (files) => {
@@ -61,39 +100,6 @@ function Home() {
     const tree = buildTree(files);
     const md = renderTree(tree);
     setMarkdown(md);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleClickZone = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const traverseFileTree = async (item, path, result, hide) => {
-    return new Promise((resolve) => {
-      if (hide && item.name.startsWith(".")) {
-        return resolve();
-      }
-
-      if (item.isFile) {
-        item.file((file) => {
-          result.push({ path: path + file.name });
-          resolve();
-        });
-      } else if (item.isDirectory) {
-        const dirReader = item.createReader();
-        dirReader.readEntries(async (entries) => {
-          for (const entry of entries) {
-            await traverseFileTree(entry, path + item.name + "/", result, hide);
-          }
-          resolve();
-        });
-      }
-    });
   };
 
   const buildTree = (files) => {
@@ -162,17 +168,118 @@ function Home() {
     URL.revokeObjectURL(url);
   };
 
+  const handleClickZone = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const filteredSuggestions = allNames
+    .filter(
+      (name) =>
+        name.toLowerCase().includes(inputValue.toLowerCase()) &&
+        !customExcludesExact.includes(name)
+    )
+    .slice(0, 10);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIndex((prev) =>
+        prev < filteredSuggestions.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIndex((prev) =>
+        prev > 0 ? prev - 1 : filteredSuggestions.length - 1
+      );
+    } else if (e.key === "Enter" && highlightIndex >= 0) {
+      const selected = filteredSuggestions[highlightIndex];
+      if (selected) {
+        setCustomExcludesExact([...customExcludesExact, selected]);
+        setInputValue("");
+        setHighlightIndex(-1);
+      }
+    }
+  };
+
   return (
     <div className="container">
       <h1>📁 拖曳或點擊選擇資料夾 ➜ 自動產出 Markdown 目錄樹</h1>
-      <label className="checkbox">
-        <input
-          type="checkbox"
-          checked={hideDotfiles}
-          onChange={(e) => setHideDotfiles(e.target.checked)}
-        />
-        隱藏以「.」開頭的檔案或資料夾（如 .git）
-      </label>
+
+      <div className="checkbox">
+        <span>點擊或輸入自訂資料夾/檔案即可隱藏：</span>
+        {Object.keys(excludedItems).map((item) => (
+          <button
+            key={item}
+            onClick={() =>
+              setExcludedItems((prev) => ({
+                ...prev,
+                [item]: !prev[item],
+              }))
+            }
+            className={`exclude-button ${excludedItems[item] ? "active" : ""}`}
+          >
+            {item}
+          </button>
+        ))}
+
+        <div className="custom-input-wrapper">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              setHighlightIndex(-1);
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder="輸入完整檔名"
+            className="custom-input"
+          />
+          {inputValue && (
+            <div className="suggestion-list">
+              {filteredSuggestions.length > 0 ? (
+                filteredSuggestions.map((name, index) => (
+                  <div
+                    key={name}
+                    onClick={() => {
+                      setCustomExcludesExact([...customExcludesExact, name]);
+                      setInputValue("");
+                      setHighlightIndex(-1);
+                    }}
+                    className={`suggestion-item ${
+                      highlightIndex === index ? "highlighted" : ""
+                    } ${index % 2 === 0 ? "even" : "odd"}`}
+                  >
+                    {name}
+                  </div>
+                ))
+              ) : (
+                <div className="no-suggestions">無相符項目</div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {customExcludesExact.length > 0 && (
+          <div className="custom-excludes">
+            {customExcludesExact.map((name) => (
+              <span
+                key={name}
+                onClick={() =>
+                  setCustomExcludesExact(
+                    customExcludesExact.filter((n) => n !== name)
+                  )
+                }
+                className="exclude-tag"
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
       <input
         ref={fileInputRef}
         type="file"
@@ -185,7 +292,7 @@ function Home() {
       <div
         className="drop-zone"
         onDrop={handleDrop}
-        onDragOver={handleDragOver}
+        onDragOver={(e) => e.preventDefault()}
         onClick={handleClickZone}
       >
         <PixelCard variant="blue" />
@@ -193,6 +300,7 @@ function Home() {
           📂 請拖曳整個資料夾或點擊此區塊選擇資料夾
         </div>
       </div>
+
       <div className="output-container">
         <div className="output-header">
           <span>Markdown</span>
@@ -218,7 +326,8 @@ function Home() {
         <pre className="output" ref={textRef}>
           {markdown}
         </pre>
-      </div>{" "}
+      </div>
+
       <p className="note">
         本網站為純前端應用程式。
         <br /> 所有操作皆在您的瀏覽器中執行。
