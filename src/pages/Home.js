@@ -1,45 +1,52 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../styles/Home.css";
+import PixelCard from "../components/PixelCard/PixelCard";
 
 function Home() {
   const [markdown, setMarkdown] = useState("");
   const [hideDotfiles, setHideDotfiles] = useState(false);
+  const [files, setFiles] = useState([]);
   const textRef = useRef(null);
   const fileInputRef = useRef(null);
   const [rootFolderName, setRootFolderName] = useState("directory_tree");
+
+  useEffect(() => {
+    if (files.length > 0) {
+      const filteredFiles = hideDotfiles
+        ? files.filter((file) => {
+            const parts = file.path.split("/");
+            return !parts.some((part) => part.startsWith("."));
+          })
+        : files;
+      processFiles(filteredFiles);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hideDotfiles, files]);
 
   const handleDrop = async (e) => {
     e.preventDefault();
     const items = e.dataTransfer.items;
     if (!items) return;
 
-    const files = [];
+    const filesArray = [];
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i].webkitGetAsEntry();
       if (item) {
-        await traverseFileTree(item, "", files, hideDotfiles);
+        await traverseFileTree(item, "", filesArray, hideDotfiles);
       }
     }
-
-    processFiles(files);
+    setFiles(filesArray);
+    processFiles(filesArray);
   };
 
   const handleFileSelect = async (e) => {
     const fileList = Array.from(e.target.files);
-
-    const filtered = hideDotfiles
-      ? fileList.filter((file) => {
-          const parts = file.webkitRelativePath.split("/");
-          return !parts.some((part) => part.startsWith("."));
-        })
-      : fileList;
-
-    const files = filtered.map((file) => ({
+    const filesArray = fileList.map((file) => ({
       path: file.webkitRelativePath,
     }));
-
-    processFiles(files);
+    setFiles(filesArray);
+    processFiles(filesArray);
   };
 
   const processFiles = (files) => {
@@ -95,7 +102,7 @@ function Home() {
       const firstPath = files[0].path;
       const parts = firstPath.split("/");
       if (parts.length > 1) {
-        setRootFolderName(parts[0]); // 只取最上層資料夾名稱
+        setRootFolderName(parts[0]);
       }
     }
 
@@ -158,7 +165,6 @@ function Home() {
   return (
     <div className="container">
       <h1>📁 拖曳或點擊選擇資料夾 ➜ 自動產出 Markdown 目錄樹</h1>
-
       <label className="checkbox">
         <input
           type="checkbox"
@@ -167,8 +173,6 @@ function Home() {
         />
         隱藏以「.」開頭的檔案或資料夾（如 .git）
       </label>
-
-      {/* 隱藏的資料夾選擇 input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -178,17 +182,17 @@ function Home() {
         onChange={handleFileSelect}
         style={{ display: "none" }}
       />
-
-      {/* 拖曳與點擊區 */}
       <div
         className="drop-zone"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleClickZone}
       >
-        📂 請拖曳整個資料夾或點擊此區塊選擇資料夾
+        <PixelCard variant="blue" />
+        <div className="drop-text">
+          📂 請拖曳整個資料夾或點擊此區塊選擇資料夾
+        </div>
       </div>
-
       <div className="output-container">
         <div className="output-header">
           <span>Markdown</span>
@@ -214,7 +218,12 @@ function Home() {
         <pre className="output" ref={textRef}>
           {markdown}
         </pre>
-      </div>
+      </div>{" "}
+      <p className="note">
+        本網站為純前端應用程式。
+        <br /> 所有操作皆在您的瀏覽器中執行。
+        <br /> 不會上傳或儲存任何資料，請安心使用。
+      </p>
     </div>
   );
 }
