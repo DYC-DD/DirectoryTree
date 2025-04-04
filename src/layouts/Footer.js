@@ -17,6 +17,7 @@ const Footer = () => {
 
     return () => {
       if (footerRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         observer.unobserve(footerRef.current);
       }
     };
@@ -25,11 +26,6 @@ const Footer = () => {
   return (
     <footer id="footer" ref={footerRef} className="animated-footer">
       <p>© 2025 DYC. All rights reserved.</p>
-      <p>
-        This website is a purely frontend application. All operations are
-        executed within your browser. No data is uploaded or stored. You can use
-        it with confidence.
-      </p>
       <p>
         Developed and maintained by{" "}
         <a
