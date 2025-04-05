@@ -1,4 +1,5 @@
 import React from "react";
+import "./i18n";
 import Home from "./pages/Home";
 import Footer from "./layouts/Footer";
 import "./styles/App.css";
