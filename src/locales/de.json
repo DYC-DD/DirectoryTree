@@ -1,0 +1,10 @@
+{
+  "title": "📁 Ordner ziehen oder klicken, um auszuwählen ➜ Automatisch Markdown-Verzeichnisbaum erstellen",
+  "hideLabel": "Klicken oder eingeben, um benutzerdefinierte Ordner/Dateien auszublenden:",
+  "inputPlaceholder": "Vollständigen Dateinamen eingeben",
+  "noSuggestions": "Keine passenden Einträge",
+  "dropZoneText": "📂 Ziehen Sie einen ganzen Ordner hierher oder klicken Sie, um einen Ordner auszuwählen",
+  "copy": "Kopieren",
+  "download": "Herunterladen",
+  "note": "Diese Website ist eine reine Frontend-Anwendung.\nAlle Vorgänge werden in Ihrem Browser ausgeführt.\nEs werden keine Daten auf einen Server hochgeladen oder gespeichert – Sie können sie sicher verwenden."
+}

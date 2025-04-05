@@ -1,0 +1,10 @@
+{
+  "title": "📁 Drag or click to select a folder ➜ a Markdown directory tree will be generated automatically.",
+  "hideLabel": "Hide folders or files by clicking or entering custom names：",
+  "inputPlaceholder": "Please enter the complete file name",
+  "noSuggestions": "No results found",
+  "dropZoneText": "📂 Drag and drop a folder here, or click this area to select one.",
+  "copy": "Copy",
+  "download": "Download",
+  "note": "This website is a purely frontend application.\nAll operations are executed within your browser.\nNo data is uploaded or stored on any backend server, so you can use it with confidence."
+}

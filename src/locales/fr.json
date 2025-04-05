@@ -1,0 +1,10 @@
+{
+  "title": "📁 Faites glisser ou cliquez pour sélectionner un dossier ➜ Générer automatiquement un arbre Markdown",
+  "hideLabel": "Cliquez ou saisissez pour masquer un dossier/fichier personnalisé :",
+  "inputPlaceholder": "Entrez le nom complet du fichier",
+  "noSuggestions": "Aucun élément correspondant",
+  "dropZoneText": "📂 Faites glisser un dossier complet ou cliquez ici pour le sélectionner",
+  "copy": "Copier",
+  "download": "Télécharger",
+  "note": "Ce site est une application entièrement côté client.\nToutes les opérations sont effectuées dans votre navigateur.\nAucune donnée n'est téléchargée ou enregistrée sur un serveur, vous pouvez l'utiliser en toute sécurité."
+}

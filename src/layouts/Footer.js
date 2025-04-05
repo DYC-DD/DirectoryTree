@@ -36,10 +36,8 @@ const Footer = () => {
           DYC-DD
         </a>
       </p>
-
-      {/* 聯絡方式 */}
       <p>
-        <a href="dyccc01@gmail.com">Contact Us</a>
+        <a href="mailto:dyccc01@gmail.com">Contact Us</a>
       </p>
     </footer>
   );
