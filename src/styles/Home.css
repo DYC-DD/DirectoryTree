@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-  padding: 2em 12em;
+  padding: 2em 8em;
   font-family: "Segoe UI", sans-serif;
   background-color: #212121;
   min-height: 100vh;
@@ -23,6 +23,7 @@ h1 {
   color: #ececec;
   text-align: center;
   user-select: none;
+  font-size: 2.4em;
 }
 
 .note {
@@ -230,4 +231,24 @@ h1 {
 
 .output-header button:hover .icon {
   filter: brightness(0) invert(100%);
+}
+
+.languageItems {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto;
+  margin-bottom: 30px;
+  height: 100px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.languageItems a {
+  color: #ececec;
+  text-decoration: none;
+}
+
+.languageItems a:hover {
+  text-decoration: none;
+  opacity: 0.8;
 }

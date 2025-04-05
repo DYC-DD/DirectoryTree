@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../styles/Home.css";
 import PixelCard from "../components/PixelCard/PixelCard";
+import GooeyNav from "../components/GooeyNav/GooeyNav";
+import { useTranslation } from "react-i18next";
 
 function Home() {
   const [markdown, setMarkdown] = useState("");
@@ -18,6 +20,18 @@ function Home() {
   const textRef = useRef(null);
   const fileInputRef = useRef(null);
   const [rootFolderName, setRootFolderName] = useState("directory_tree");
+  const { t, i18n } = useTranslation();
+  const languageItems = [
+    { label: "繁體中文", language: "zhhant", href: "#" },
+    { label: "简体中文", language: "zhhans", href: "#" },
+    { label: "English", language: "en", href: "#" },
+    { label: "日本語", language: "ja", href: "#" },
+    { label: "한국어", language: "ko", href: "#" },
+    { label: "Español", language: "es", href: "#" },
+    { label: "Français", language: "fr", href: "#" },
+    { label: "Deutsch", language: "de", href: "#" },
+    { label: "हिंदी", language: "hi", href: "#" },
+  ];
 
   useEffect(() => {
     if (files.length > 0) {
@@ -205,10 +219,10 @@ function Home() {
 
   return (
     <div className="container">
-      <h1>📁 拖曳或點擊選擇資料夾 ➜ 自動產出 Markdown 目錄樹</h1>
+      <h1>{t("title")}</h1>
 
       <div className="checkbox">
-        <span>點擊或輸入自訂資料夾/檔案即可隱藏：</span>
+        <span>{t("hideLabel")}</span>
         {Object.keys(excludedItems).map((item) => (
           <button
             key={item}
@@ -233,7 +247,7 @@ function Home() {
               setHighlightIndex(-1);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="輸入完整檔名"
+            placeholder={t("inputPlaceholder")}
             className="custom-input"
           />
           {inputValue && (
@@ -255,7 +269,7 @@ function Home() {
                   </div>
                 ))
               ) : (
-                <div className="no-suggestions">無相符項目</div>
+                <div className="no-suggestions">{t("noSuggestions")}</div>
               )}
             </div>
           )}
@@ -296,9 +310,7 @@ function Home() {
         onClick={handleClickZone}
       >
         <PixelCard variant="blue" />
-        <div className="drop-text">
-          📂 請拖曳整個資料夾或點擊此區塊選擇資料夾
-        </div>
+        <div className="drop-text">{t("dropZoneText")}</div>
       </div>
 
       <div className="output-container">
@@ -308,18 +320,18 @@ function Home() {
             <button onClick={copyToClipboard}>
               <img
                 src={`${process.env.PUBLIC_URL}/images/copy-solid.png`}
-                alt="複製"
+                alt="copy"
                 className="icon"
               />
-              複製
+              {t("copy")}
             </button>
             <button onClick={downloadMarkdown}>
               <img
                 src={`${process.env.PUBLIC_URL}/images/download-solid.png`}
-                alt="下載"
+                alt="download"
                 className="icon"
               />
-              下載
+              {t("download")}
             </button>
           </div>
         </div>
@@ -329,10 +341,28 @@ function Home() {
       </div>
 
       <p className="note">
-        本網站為純前端應用程式。
-        <br /> 所有操作皆在您的瀏覽器中執行。
-        <br /> 不會上傳或儲存任何資料，請安心使用。
+        {t("note")
+          .split("\n")
+          .map((line, index) => (
+            <span key={index}>
+              {line}
+              <br />
+            </span>
+          ))}
       </p>
+      <div className="languageItems">
+        <GooeyNav
+          items={languageItems}
+          animationTime={600}
+          pCount={15}
+          minDistance={20}
+          maxDistance={42}
+          maxRotate={75}
+          colors={[1, 2, 3, 1, 2, 3, 1, 4]}
+          timeVariance={300}
+          onItemClick={(item) => i18n.changeLanguage(item.language)}
+        />
+      </div>
     </div>
   );
 }
