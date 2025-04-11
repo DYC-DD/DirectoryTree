@@ -16,7 +16,6 @@ function Home() {
   const [inputValue, setInputValue] = useState("");
   const [allNames, setAllNames] = useState([]);
   const [highlightIndex, setHighlightIndex] = useState(-1);
-
   const textRef = useRef(null);
   const fileInputRef = useRef(null);
   const [rootFolderName, setRootFolderName] = useState("directory_tree");
@@ -32,9 +31,18 @@ function Home() {
     { label: "Deutsch", language: "de", href: "#" },
     { label: "हिंदी", language: "hi", href: "#" },
   ];
+  const [uploadMode, setUploadMode] = useState("folder");
+  const [jsonFileName, setJsonFileName] = useState(null);
+  const getJsonBaseName = (filename) => filename.replace(/\.json$/i, "");
 
   useEffect(() => {
-    if (files.length > 0) {
+    setMarkdown("");
+    setFiles([]);
+    setJsonFileName(null);
+  }, [uploadMode]);
+
+  useEffect(() => {
+    if (files.length > 0 && uploadMode === "folder") {
       const uniqueNames = new Set();
       files.forEach((file) => {
         const parts = file.path.split("/");
@@ -57,22 +65,54 @@ function Home() {
       processFiles(filteredFiles);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [excludedItems, customExcludesExact, files]);
+  }, [excludedItems, customExcludesExact, files, uploadMode]);
 
   const handleDrop = async (e) => {
     e.preventDefault();
-    const items = e.dataTransfer.items;
-    if (!items) return;
 
-    const filesArray = [];
+    if (uploadMode === "json") {
+      const file = e.dataTransfer.files[0];
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i].webkitGetAsEntry();
-      if (item) {
-        await traverseFileTree(item, "", filesArray);
+      if (
+        !file ||
+        e.dataTransfer.files.length > 1 ||
+        !file.name.toLowerCase().endsWith(".json")
+      ) {
+        setMarkdown(t("onlySingleFile"));
+        return;
       }
+
+      setJsonFileName(getJsonBaseName(file.name));
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          const treeMarkdown = renderJsonTree(
+            parsed,
+            "",
+            true,
+            getJsonBaseName(file.name)
+          );
+          setMarkdown(treeMarkdown);
+        } catch (err) {
+          console.error("JSON 解析錯誤：", err);
+          setMarkdown(t("invalidFormat"));
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      const items = e.dataTransfer.items;
+      if (!items) return;
+
+      const filesArray = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i].webkitGetAsEntry();
+        if (item) {
+          await traverseFileTree(item, "", filesArray);
+        }
+      }
+      setFiles(filesArray);
     }
-    setFiles(filesArray);
   };
 
   const handleFileSelect = async (e) => {
@@ -81,6 +121,40 @@ function Home() {
       path: file.webkitRelativePath,
     }));
     setFiles(filesArray);
+  };
+
+  const handleJsonSelect = (e) => {
+    const file = e.target.files[0];
+
+    // 檢查是否只有一個檔案，且是 .json
+    if (
+      !file ||
+      e.target.files.length > 1 ||
+      !file.name.toLowerCase().endsWith(".json")
+    ) {
+      setMarkdown(t("requireJsonFile"));
+      return;
+    }
+
+    setJsonFileName(file.name.replace(/\.json$/i, ""));
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        const treeMarkdown = renderJsonTree(
+          parsed,
+          "",
+          true,
+          file.name.replace(/\.json$/i, "")
+        );
+        setMarkdown(treeMarkdown);
+      } catch (err) {
+        console.error("JSON 解析錯誤：", err);
+        setMarkdown(t("invalidFormat"));
+      }
+    };
+    reader.readAsText(file);
   };
 
   const traverseFileTree = async (item, path, result) => {
@@ -163,6 +237,57 @@ function Home() {
     return md;
   };
 
+  // JSON 樹狀結構轉換函式
+  const formatPrimitive = (value) => {
+    if (typeof value === "string") {
+      return `"${value}"`;
+    } else if (value === null) {
+      return "null";
+    }
+    return String(value);
+  };
+
+  const renderJsonTree = (
+    data,
+    indent = "",
+    isRoot = true,
+    rootName = "root"
+  ) => {
+    let md = "";
+    if (isRoot) {
+      md += `${rootName}.json\n`;
+    }
+    if (Array.isArray(data)) {
+      data.forEach((item, index) => {
+        const isLast = index === data.length - 1;
+        const prefix = indent + (isLast ? "└── " : "├── ");
+        if (typeof item === "object" && item !== null) {
+          md += prefix + `[${index}]\n`;
+          const deeperIndent = indent + (isLast ? "    " : "│   ");
+          md += renderJsonTree(item, deeperIndent, false);
+        } else {
+          md += prefix + `[${index}]: ` + formatPrimitive(item) + "\n";
+        }
+      });
+    } else if (typeof data === "object" && data !== null) {
+      const entries = Object.entries(data);
+      entries.forEach(([key, value], index) => {
+        const isLast = index === entries.length - 1;
+        const prefix = indent + (isLast ? "└── " : "├── ");
+        if (typeof value === "object" && value !== null) {
+          md += prefix + key + "\n";
+          const deeperIndent = indent + (isLast ? "    " : "│   ");
+          md += renderJsonTree(value, deeperIndent, false);
+        } else {
+          md += prefix + key + ": " + formatPrimitive(value) + "\n";
+        }
+      });
+    } else {
+      md += indent + formatPrimitive(data) + "\n";
+    }
+    return md;
+  };
+
   const copyToClipboard = () => {
     if (textRef.current) {
       navigator.clipboard.writeText(markdown);
@@ -170,10 +295,19 @@ function Home() {
   };
 
   const downloadMarkdown = () => {
+    if (!markdown.trim()) {
+      alert(t("alert.noContent"));
+      return;
+    }
+
+    const filename =
+      uploadMode === "json"
+        ? `${jsonFileName || "json_tree"}.md`
+        : `${rootFolderName}.md`;
+
     const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    const filename = `${rootFolderName}.md`;
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -219,9 +353,22 @@ function Home() {
 
   return (
     <div className="container">
-      <h1>{t("title")}</h1>
+      <h1>
+        {t(`title.prefix.${uploadMode}`)}
+        <span style={{ display: "inline-block" }}>
+          <select
+            value={uploadMode}
+            onChange={(e) => setUploadMode(e.target.value)}
+            className="title-mode-select"
+          >
+            <option value="folder">{t("modeOptionFolder")}</option>
+            <option value="json">{t("modeOptionJson")}</option>
+          </select>
+        </span>
+        {t("title.suffix")}
+      </h1>
 
-      <div className="checkbox">
+      <div className={`checkbox ${uploadMode !== "folder" ? "hidden" : ""}`}>
         <span>{t("hideLabel")}</span>
         {Object.keys(excludedItems).map((item) => (
           <button
@@ -297,12 +444,13 @@ function Home() {
       <input
         ref={fileInputRef}
         type="file"
-        webkitdirectory="true"
-        directory=""
-        multiple
-        onChange={handleFileSelect}
+        {...(uploadMode === "folder"
+          ? { webkitdirectory: "true", directory: "", multiple: true }
+          : { accept: ".json", multiple: false })}
+        onChange={uploadMode === "folder" ? handleFileSelect : handleJsonSelect}
         style={{ display: "none" }}
       />
+
       <div
         className="drop-zone"
         onDrop={handleDrop}
@@ -310,7 +458,11 @@ function Home() {
         onClick={handleClickZone}
       >
         <PixelCard variant="blue" />
-        <div className="drop-text">{t("dropZoneText")}</div>
+        <div className="drop-text">
+          {uploadMode === "folder"
+            ? t("dropZoneTextFolder")
+            : t("dropZoneTextJson")}
+        </div>
       </div>
 
       <div className="output-container">

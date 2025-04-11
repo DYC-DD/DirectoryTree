@@ -1,10 +1,20 @@
 {
-  "title": "📁 Ordner ziehen oder klicken, um auszuwählen ➜ Automatisch Markdown-Verzeichnisbaum erstellen",
+  "title.prefix.folder": "📁 Ordner ziehen oder klicken",
+  "title.prefix.json": "📄 JSON-Datei ziehen oder klicken",
+  "title.suffix": " ➜ Automatisch Markdown-Verzeichnisbaum erstellen",
+  "modeLabel": "Upload-Typ:",
+  "modeOptionFolder": "Ordner",
+  "modeOptionJson": "JSON",
   "hideLabel": "Klicken oder eingeben, um benutzerdefinierte Ordner/Dateien auszublenden:",
   "inputPlaceholder": "Vollständigen Dateinamen eingeben",
   "noSuggestions": "Keine passenden Einträge",
-  "dropZoneText": "📂 Ziehen Sie einen ganzen Ordner hierher oder klicken Sie, um einen Ordner auszuwählen",
+  "dropZoneTextFolder": "📂 Ziehen Sie einen ganzen Ordner hierher oder klicken Sie, um einen Ordner auszuwählen",
+  "dropZoneTextJson": "📄 Ziehen Sie eine JSON-Datei hierher oder klicken Sie, um eine JSON-Datei auszuwählen",
   "copy": "Kopieren",
   "download": "Herunterladen",
-  "note": "Diese Website ist eine reine Frontend-Anwendung.\nAlle Vorgänge werden in Ihrem Browser ausgeführt.\nEs werden keine Daten auf einen Server hochgeladen oder gespeichert – Sie können sie sicher verwenden."
+  "note": "Diese Website ist eine reine Frontend-Anwendung.\nAlle Vorgänge werden in Ihrem Browser ausgeführt.\nEs werden keine Daten auf einen Server hochgeladen oder gespeichert – Sie können sie sicher verwenden.",
+  "onlySingleFile": "Nur eine .json-Datei kann per Drag & Drop hochgeladen werden.",
+  "invalidFormat": "Ungültiges JSON-Format. Bitte überprüfen Sie den Dateiinhalt.",
+  "requireJsonFile": "Es darf nur eine JSON-Datei mit der Endung .json hochgeladen werden.",
+  "alert.noContent": "Es wurde noch kein Inhalt generiert. Download nicht möglich!"
 }
