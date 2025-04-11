@@ -1,10 +1,20 @@
 {
-  "title": "📁 Arrastra o haz clic para seleccionar una carpeta ➜ Generar automáticamente árbol de directorios en Markdown",
+  "title.prefix.folder": "📁 Arrastra o haz clic para seleccionar",
+  "title.prefix.json": "📄 Arrastra o haz clic para seleccionar",
+  "title.suffix": " ➜ Generar automáticamente árbol de directorios en Markdown",
+  "modeLabel": "Tipo de carga:",
+  "modeOptionFolder": "Carpeta",
+  "modeOptionJson": "JSON",
   "hideLabel": "Haz clic o escribe para ocultar carpeta/archivo personalizado:",
   "inputPlaceholder": "Introduce el nombre completo del archivo",
   "noSuggestions": "No hay elementos coincidentes",
-  "dropZoneText": "📂 Arrastra una carpeta completa o haz clic aquí para seleccionarla",
+  "dropZoneTextFolder": "📂 Arrastra una carpeta completa o haz clic aquí para seleccionarla",
+  "dropZoneTextJson": "📄 Arrastra un archivo JSON o haz clic aquí para seleccionarlo",
   "copy": "Copiar",
   "download": "Descargar",
-  "note": "Este sitio web es una aplicación completamente frontend.\nTodas las operaciones se realizan en tu navegador.\nNo se sube ni guarda ningún dato en el servidor. Puedes usarlo con confianza."
+  "note": "Este sitio web es una aplicación completamente frontend.\nTodas las operaciones se realizan en tu navegador.\nNo se sube ni guarda ningún dato en el servidor. Puedes usarlo con confianza.",
+  "onlySingleFile": "Solo se admite arrastrar un único archivo .json.",
+  "invalidFormat": "Formato JSON no válido. Verifica el contenido del archivo.",
+  "requireJsonFile": "Solo se permite subir un único archivo JSON con extensión .json.",
+  "alert.noContent": "Aún no se ha generado contenido. ¡No se puede descargar!"
 }

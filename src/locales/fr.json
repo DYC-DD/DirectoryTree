@@ -1,10 +1,20 @@
 {
-  "title": "📁 Faites glisser ou cliquez pour sélectionner un dossier ➜ Générer automatiquement un arbre Markdown",
+  "title.prefix.folder": "📁 Faites glisser ou cliquez pour sélectionner",
+  "title.prefix.json": "📄 Faites glisser ou cliquez pour sélectionner",
+  "title.suffix": " ➜ Générer automatiquement un arbre Markdown",
+  "modeLabel": "Type de chargement :",
+  "modeOptionFolder": "Dossier",
+  "modeOptionJson": "JSON",
   "hideLabel": "Cliquez ou saisissez pour masquer un dossier/fichier personnalisé :",
   "inputPlaceholder": "Entrez le nom complet du fichier",
   "noSuggestions": "Aucun élément correspondant",
-  "dropZoneText": "📂 Faites glisser un dossier complet ou cliquez ici pour le sélectionner",
+  "dropZoneTextFolder": "📂 Faites glisser un dossier complet ou cliquez ici pour le sélectionner",
+  "dropZoneTextJson": "📄 Faites glisser un fichier JSON ou cliquez ici pour le sélectionner",
   "copy": "Copier",
   "download": "Télécharger",
-  "note": "Ce site est une application entièrement côté client.\nToutes les opérations sont effectuées dans votre navigateur.\nAucune donnée n'est téléchargée ou enregistrée sur un serveur, vous pouvez l'utiliser en toute sécurité."
+  "note": "Ce site est une application entièrement côté client.\nToutes les opérations sont effectuées dans votre navigateur.\nAucune donnée n'est téléchargée ou enregistrée sur un serveur, vous pouvez l'utiliser en toute sécurité.",
+  "onlySingleFile": "Seul un fichier .json peut être glissé-déposé.",
+  "invalidFormat": "Format JSON invalide. Veuillez vérifier le contenu du fichier.",
+  "requireJsonFile": "Seul un fichier JSON avec l'extension .json est autorisé.",
+  "alert.noContent": "Aucun contenu généré pour le moment. Téléchargement impossible !"
 }
