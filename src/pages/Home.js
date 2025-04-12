@@ -33,6 +33,9 @@ function Home() {
     { label: "Deutsch", language: "de", href: "#" },
     { label: "हिंदी", language: "hi", href: "#" },
   ];
+  const activeLangIndex = languageItems.findIndex(
+    (item) => item.language === i18n.language
+  );
   const [uploadMode, setUploadMode] = useState("folder");
 
   // 移除 JSON 或 YAML 的副檔名
@@ -584,6 +587,7 @@ function Home() {
           maxRotate={75}
           colors={[1, 2, 3, 1, 2, 3, 1, 4]}
           timeVariance={300}
+          initialActiveIndex={activeLangIndex}
           onItemClick={(item) => i18n.changeLanguage(item.language)}
         />
       </div>
