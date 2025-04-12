@@ -15,6 +15,7 @@
   "dropZoneTextYaml": "⚙️ Faites glisser un fichier YAML ou cliquez ici pour le sélectionner",
   "copy": "Copier",
   "download": "Télécharger",
+  "downloadImage": "Image",
   "note": "Ce site est une application entièrement côté client.\nToutes les opérations sont effectuées dans votre navigateur.\nAucune donnée n'est téléchargée ou enregistrée sur un serveur, vous pouvez l'utiliser en toute sécurité.",
   "onlySingleFile": "Seul un fichier .json peut être glissé-déposé.",
   "invalidJsonFormat": "Format JSON invalide. Veuillez vérifier le contenu du fichier.",

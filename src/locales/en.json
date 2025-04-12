@@ -15,6 +15,7 @@
   "dropZoneTextYaml": "⚙️ Drag and drop a YAML file here, or click this area to select one.",
   "copy": "Copy",
   "download": "Download",
+  "downloadImage": "Image",
   "note": "This website is a purely frontend application.\nAll operations are executed within your browser.\nNo data is uploaded or stored on any backend server, so you can use it with confidence.",
   "onlySingleFile": "Only a single .json file is supported for drag-and-drop.",
   "invalidJsonFormat": "Invalid JSON format. Please check the file content.",
