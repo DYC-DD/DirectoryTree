@@ -3,6 +3,7 @@ import "../styles/Home.css";
 import PixelCard from "../components/PixelCard/PixelCard";
 import GooeyNav from "../components/GooeyNav/GooeyNav";
 import { useTranslation } from "react-i18next";
+import YAML from "js-yaml";
 
 function Home() {
   const [markdown, setMarkdown] = useState("");
@@ -19,6 +20,7 @@ function Home() {
   const textRef = useRef(null);
   const fileInputRef = useRef(null);
   const [rootFolderName, setRootFolderName] = useState("directory_tree");
+  const [uploadFileName, setUploadFileName] = useState(null);
   const { t, i18n } = useTranslation();
   const languageItems = [
     { label: "繁體中文", language: "zhhant", href: "#" },
@@ -31,14 +33,19 @@ function Home() {
     { label: "Deutsch", language: "de", href: "#" },
     { label: "हिंदी", language: "hi", href: "#" },
   ];
+  const activeLangIndex = languageItems.findIndex(
+    (item) => item.language === i18n.language
+  );
   const [uploadMode, setUploadMode] = useState("folder");
-  const [jsonFileName, setJsonFileName] = useState(null);
+
+  // 移除 JSON 或 YAML 的副檔名
   const getJsonBaseName = (filename) => filename.replace(/\.json$/i, "");
+  const getYamlBaseName = (filename) => filename.replace(/\.(yaml|yml)$/i, "");
 
   useEffect(() => {
     setMarkdown("");
     setFiles([]);
-    setJsonFileName(null);
+    setUploadFileName(null);
   }, [uploadMode]);
 
   useEffect(() => {
@@ -67,40 +74,62 @@ function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [excludedItems, customExcludesExact, files, uploadMode]);
 
+  // 根據模式區分處理拖曳檔案
   const handleDrop = async (e) => {
     e.preventDefault();
 
-    if (uploadMode === "json") {
+    if (uploadMode === "json" || uploadMode === "yaml") {
       const file = e.dataTransfer.files[0];
 
-      if (
-        !file ||
-        e.dataTransfer.files.length > 1 ||
-        !file.name.toLowerCase().endsWith(".json")
-      ) {
+      if (!file || e.dataTransfer.files.length > 1) {
         setMarkdown(t("onlySingleFile"));
         return;
       }
+      // 驗證副檔名
+      if (uploadMode === "json" && !file.name.toLowerCase().endsWith(".json")) {
+        setMarkdown(t("requireJsonFile"));
+        return;
+      }
+      if (uploadMode === "yaml" && !/\.(yaml|yml)$/i.test(file.name)) {
+        setMarkdown(t("requireYamlFile"));
+        return;
+      }
 
-      setJsonFileName(getJsonBaseName(file.name));
+      setUploadFileName(
+        uploadMode === "json"
+          ? getJsonBaseName(file.name)
+          : getYamlBaseName(file.name)
+      );
+
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          const parsed = JSON.parse(event.target.result);
+          const parsed =
+            uploadMode === "json"
+              ? JSON.parse(event.target.result)
+              : YAML.load(event.target.result);
           const treeMarkdown = renderJsonTree(
             parsed,
             "",
             true,
-            getJsonBaseName(file.name)
+            uploadMode === "json"
+              ? getJsonBaseName(file.name)
+              : getYamlBaseName(file.name)
           );
           setMarkdown(treeMarkdown);
         } catch (err) {
-          console.error("JSON 解析錯誤：", err);
-          setMarkdown(t("invalidFormat"));
+          console.error(
+            uploadMode === "json" ? "JSON 解析錯誤：" : "YAML 解析錯誤：",
+            err
+          );
+          setMarkdown(
+            t(uploadMode === "json" ? "invalidJsonFormat" : "invalidYamlFormat")
+          );
         }
       };
       reader.readAsText(file);
     } else {
+      // 資料夾模式
       const items = e.dataTransfer.items;
       if (!items) return;
 
@@ -123,10 +152,9 @@ function Home() {
     setFiles(filesArray);
   };
 
+  // 處理 JSON 檔案選擇
   const handleJsonSelect = (e) => {
     const file = e.target.files[0];
-
-    // 檢查是否只有一個檔案，且是 .json
     if (
       !file ||
       e.target.files.length > 1 ||
@@ -135,9 +163,7 @@ function Home() {
       setMarkdown(t("requireJsonFile"));
       return;
     }
-
-    setJsonFileName(file.name.replace(/\.json$/i, ""));
-
+    setUploadFileName(getJsonBaseName(file.name));
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
@@ -146,12 +172,47 @@ function Home() {
           parsed,
           "",
           true,
-          file.name.replace(/\.json$/i, "")
+          getJsonBaseName(file.name)
         );
         setMarkdown(treeMarkdown);
       } catch (err) {
         console.error("JSON 解析錯誤：", err);
-        setMarkdown(t("invalidFormat"));
+        setMarkdown(
+          t(uploadMode === "json" ? "invalidJsonFormat" : "invalidYamlFormat")
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // YAML 檔案選擇處理函式
+  const handleYamlSelect = (e) => {
+    const file = e.target.files[0];
+    if (
+      !file ||
+      e.target.files.length > 1 ||
+      !/\.(yaml|yml)$/i.test(file.name)
+    ) {
+      setMarkdown(t("requireYamlFile"));
+      return;
+    }
+    setUploadFileName(getYamlBaseName(file.name));
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = YAML.load(event.target.result);
+        const treeMarkdown = renderJsonTree(
+          parsed,
+          "",
+          true,
+          getYamlBaseName(file.name)
+        );
+        setMarkdown(treeMarkdown);
+      } catch (err) {
+        console.error("YAML 解析錯誤：", err);
+        setMarkdown(
+          t(uploadMode === "json" ? "invalidJsonFormat" : "invalidYamlFormat")
+        );
       }
     };
     reader.readAsText(file);
@@ -237,7 +298,7 @@ function Home() {
     return md;
   };
 
-  // JSON 樹狀結構轉換函式
+  // 以 JSON 物件（包含 YAML 解析後的物件）產生樹狀結構 Markdown
   const formatPrimitive = (value) => {
     if (typeof value === "string") {
       return `"${value}"`;
@@ -255,7 +316,7 @@ function Home() {
   ) => {
     let md = "";
     if (isRoot) {
-      md += `${rootName}.json\n`;
+      md += `${rootName}.${uploadMode === "json" ? "json" : "yaml"}\n`;
     }
     if (Array.isArray(data)) {
       data.forEach((item, index) => {
@@ -301,8 +362,11 @@ function Home() {
     }
 
     const filename =
-      uploadMode === "json"
-        ? `${jsonFileName || "json_tree"}.md`
+      uploadMode === "json" || uploadMode === "yaml"
+        ? `${
+            uploadFileName ||
+            (uploadMode === "json" ? "json_tree" : "yaml_tree")
+          }.md`
         : `${rootFolderName}.md`;
 
     const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
@@ -363,6 +427,7 @@ function Home() {
           >
             <option value="folder">{t("modeOptionFolder")}</option>
             <option value="json">{t("modeOptionJson")}</option>
+            <option value="yaml">{t("modeOptionYaml")}</option>
           </select>
         </span>
         {t("title.suffix")}
@@ -446,8 +511,16 @@ function Home() {
         type="file"
         {...(uploadMode === "folder"
           ? { webkitdirectory: "true", directory: "", multiple: true }
-          : { accept: ".json", multiple: false })}
-        onChange={uploadMode === "folder" ? handleFileSelect : handleJsonSelect}
+          : uploadMode === "json"
+          ? { accept: ".json", multiple: false }
+          : { accept: ".yaml, .yml", multiple: false })}
+        onChange={
+          uploadMode === "folder"
+            ? handleFileSelect
+            : uploadMode === "json"
+            ? handleJsonSelect
+            : handleYamlSelect
+        }
         style={{ display: "none" }}
       />
 
@@ -461,7 +534,9 @@ function Home() {
         <div className="drop-text">
           {uploadMode === "folder"
             ? t("dropZoneTextFolder")
-            : t("dropZoneTextJson")}
+            : uploadMode === "json"
+            ? t("dropZoneTextJson")
+            : t("dropZoneTextYaml")}
         </div>
       </div>
 
@@ -512,6 +587,7 @@ function Home() {
           maxRotate={75}
           colors={[1, 2, 3, 1, 2, 3, 1, 4]}
           timeVariance={300}
+          initialActiveIndex={activeLangIndex}
           onItemClick={(item) => i18n.changeLanguage(item.language)}
         />
       </div>
