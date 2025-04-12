@@ -15,6 +15,7 @@
   "dropZoneTextYaml": "⚙️ Arrastra un archivo YAML o haz clic aquí para seleccionarlo",
   "copy": "Copiar",
   "download": "Descargar",
+  "downloadImage": "Imagen",
   "note": "Este sitio web es una aplicación completamente frontend.\nTodas las operaciones se realizan en tu navegador.\nNo se sube ni guarda ningún dato en el servidor. Puedes usarlo con confianza.",
   "onlySingleFile": "Solo se admite arrastrar un único archivo .json.",
   "invalidJsonFormat": "Formato JSON no válido. Verifica el contenido del archivo.",

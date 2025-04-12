@@ -1,9 +1,11 @@
+/* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { useState, useRef, useEffect } from "react";
 import "../styles/Home.css";
 import PixelCard from "../components/PixelCard/PixelCard";
 import GooeyNav from "../components/GooeyNav/GooeyNav";
 import { useTranslation } from "react-i18next";
 import YAML from "js-yaml";
+import { toPng } from "html-to-image";
 
 function Home() {
   const [markdown, setMarkdown] = useState("");
@@ -41,6 +43,39 @@ function Home() {
   // 移除 JSON 或 YAML 的副檔名
   const getJsonBaseName = (filename) => filename.replace(/\.json$/i, "");
   const getYamlBaseName = (filename) => filename.replace(/\.(yaml|yml)$/i, "");
+
+  const downloadImage = () => {
+    if (!markdown.trim()) {
+      alert(t("alert.noContent"));
+      return;
+    }
+
+    const node = document.getElementById("screenshot-wrapper");
+    if (!node) return;
+
+    node.style.display = "block";
+    toPng(node, {
+      cacheBust: true,
+      pixelRatio: 3,
+    })
+      .then((dataUrl) => {
+        node.style.display = "none";
+
+        const link = document.createElement("a");
+        const filename =
+          uploadMode === "json" || uploadMode === "yaml"
+            ? `${uploadFileName || "tree"}.png`
+            : `${rootFolderName}.png`;
+
+        link.download = filename;
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        node.style.display = "none";
+        console.error("圖片轉換失敗", err);
+      });
+  };
 
   useEffect(() => {
     setMarkdown("");
@@ -415,6 +450,12 @@ function Home() {
     }
   };
 
+  const lines = markdown
+    .split("\n")
+    .filter(
+      (line, idx, arr) => !(idx === arr.length - 1 && line.trim() === "")
+    );
+
   return (
     <div className="container">
       <h1>
@@ -560,6 +601,14 @@ function Home() {
               />
               {t("download")}
             </button>
+            <button onClick={downloadImage}>
+              <img
+                src={`${process.env.PUBLIC_URL}/images/image-solid.png`}
+                alt="image"
+                className="icon"
+              />
+              {t("downloadImage")}
+            </button>
           </div>
         </div>
         <pre className="output" ref={textRef}>
@@ -590,6 +639,30 @@ function Home() {
           initialActiveIndex={activeLangIndex}
           onItemClick={(item) => i18n.changeLanguage(item.language)}
         />
+      </div>
+
+      <div id="screenshot-wrapper" style={{ display: "none" }}>
+        <div className="codeSnap-wrapper">
+          <div className="codeSnap-header">
+            <span className="dot red" />
+            <span className="dot yellow" />
+            <span className="dot green" />
+          </div>
+          <div className="codeSnap-body-with-lines">
+            <div className="line-numbers">
+              {lines.map((_, idx) => (
+                <div key={idx}>{idx + 1}</div>
+              ))}
+            </div>
+            <div className="codeSnap-body">
+              {lines.map((line, idx) => (
+                <div key={idx} className="codeSnap-body-line">
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
