@@ -15,6 +15,7 @@
   "dropZoneTextYaml": "⚙️ Ziehen Sie eine YAML-Datei hierher oder klicken Sie, um eine YAML-Datei auszuwählen",
   "copy": "Kopieren",
   "download": "Herunterladen",
+  "downloadImage": "Bild",
   "note": "Diese Website ist eine reine Frontend-Anwendung.\nAlle Vorgänge werden in Ihrem Browser ausgeführt.\nEs werden keine Daten auf einen Server hochgeladen oder gespeichert – Sie können sie sicher verwenden.",
   "onlySingleFile": "Nur eine .json-Datei kann per Drag & Drop hochgeladen werden.",
   "invalidJsonFormat": "Ungültiges JSON-Format. Bitte überprüfen Sie den Dateiinhalt.",

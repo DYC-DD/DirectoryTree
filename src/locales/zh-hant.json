@@ -15,6 +15,7 @@
   "dropZoneTextYaml": "⚙️ 請拖曳 YAML檔或點擊此區塊選擇 YAML檔",
   "copy": "複製",
   "download": "下載",
+  "downloadImage": "圖片",
   "note": "本網站為純前端應用程式。\n所有操作皆在您的瀏覽器中執行。\n不會上傳或儲存任何資料到後端做使用，請安心使用。",
   "onlySingleFile": "僅支援拖曳單一 .json 檔案",
   "invalidJsonFormat": "上傳的 JSON 格式無效，請確認內容正確",
