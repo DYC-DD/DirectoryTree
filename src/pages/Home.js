@@ -44,6 +44,15 @@ function Home() {
   const getJsonBaseName = (filename) => filename.replace(/\.json$/i, "");
   const getYamlBaseName = (filename) => filename.replace(/\.(yaml|yml)$/i, "");
 
+  const [showFileSize, setShowFileSize] = useState(false);
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  };
+
   const downloadImage = () => {
     if (!markdown.trim()) {
       alert(t("alert.noContent"));
@@ -60,13 +69,11 @@ function Home() {
     })
       .then((dataUrl) => {
         node.style.display = "none";
-
         const link = document.createElement("a");
         const filename =
           uploadMode === "json" || uploadMode === "yaml"
             ? `${uploadFileName || "tree"}.png`
             : `${rootFolderName}.png`;
-
         link.download = filename;
         link.href = dataUrl;
         link.click();
@@ -107,7 +114,7 @@ function Home() {
       processFiles(filteredFiles);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [excludedItems, customExcludesExact, files, uploadMode]);
+  }, [excludedItems, customExcludesExact, files, uploadMode, showFileSize]);
 
   // 根據模式區分處理拖曳檔案
   const handleDrop = async (e) => {
@@ -120,7 +127,6 @@ function Home() {
         setMarkdown(t("onlySingleFile"));
         return;
       }
-      // 驗證副檔名
       if (uploadMode === "json" && !file.name.toLowerCase().endsWith(".json")) {
         setMarkdown(t("requireJsonFile"));
         return;
@@ -183,6 +189,7 @@ function Home() {
     const fileList = Array.from(e.target.files);
     const filesArray = fileList.map((file) => ({
       path: file.webkitRelativePath,
+      size: file.size,
     }));
     setFiles(filesArray);
   };
@@ -257,7 +264,10 @@ function Home() {
     return new Promise((resolve) => {
       if (item.isFile) {
         item.file((file) => {
-          result.push({ path: path + file.name });
+          result.push({
+            path: path + file.name,
+            size: file.size,
+          });
           resolve();
         });
       } else if (item.isDirectory) {
@@ -282,6 +292,8 @@ function Home() {
     });
 
     const tree = buildTree(files);
+    // 計算並注入每個資料夾的總容量
+    computeFolderSizes(tree);
     const md = renderTree(tree);
     setMarkdown(md);
   };
@@ -303,7 +315,7 @@ function Home() {
         const isFolder = i !== parts.length - 1;
         const key = isFolder ? part + "/" : part;
         if (!current[key]) {
-          current[key] = isFolder ? {} : null;
+          current[key] = isFolder ? {} : { size: file.size };
         }
         current = current[key];
       });
@@ -311,11 +323,33 @@ function Home() {
     return root;
   };
 
+  const computeFolderSizes = (node) => {
+    let sum = 0;
+    Object.keys(node).forEach((childKey) => {
+      const child = node[childKey];
+      if (child && typeof child === "object" && "size" in child) {
+        sum += child.size;
+      } else if (child && typeof child === "object") {
+        const folderSize = computeFolderSizes(child);
+
+        Object.defineProperty(child, "totalSize", {
+          value: folderSize,
+          enumerable: false,
+          writable: true,
+        });
+        sum += folderSize;
+      }
+    });
+    return sum;
+  };
+
   const renderTree = (tree, indent = "", isRoot = true) => {
     let md = "";
     const entries = Object.entries(tree).sort(([a], [b]) => {
-      const isDirA = tree[a] !== null;
-      const isDirB = tree[b] !== null;
+      const isDirA =
+        tree[a] !== null && typeof tree[a] === "object" && !("size" in tree[a]);
+      const isDirB =
+        tree[b] !== null && typeof tree[b] === "object" && !("size" in tree[b]);
       if (isDirA !== isDirB) return isDirA ? -1 : 1;
       return a.localeCompare(b);
     });
@@ -323,8 +357,27 @@ function Home() {
     entries.forEach(([key, value], idx) => {
       const isLast = idx === entries.length - 1;
       const prefix = isRoot ? "" : indent + (isLast ? "└── " : "├── ");
-      md += prefix + key + "\n";
-      if (value !== null) {
+      let sizeInfo = "";
+
+      if (
+        showFileSize &&
+        value &&
+        typeof value === "object" &&
+        "size" in value
+      ) {
+        sizeInfo = ` (${formatBytes(value.size)})`;
+      }
+      if (
+        showFileSize &&
+        value &&
+        typeof value === "object" &&
+        !("size" in value) &&
+        value.totalSize !== undefined
+      ) {
+        sizeInfo += ` (${formatBytes(value.totalSize)})`;
+      }
+      md += prefix + key + sizeInfo + "\n";
+      if (value && typeof value === "object" && !("size" in value)) {
         const deeperIndent = isRoot ? "" : indent + (isLast ? "    " : "│   ");
         md += renderTree(value, deeperIndent, false);
       }
@@ -395,7 +448,6 @@ function Home() {
       alert(t("alert.noContent"));
       return;
     }
-
     const filename =
       uploadMode === "json" || uploadMode === "yaml"
         ? `${
@@ -403,7 +455,6 @@ function Home() {
             (uploadMode === "json" ? "json_tree" : "yaml_tree")
           }.md`
         : `${rootFolderName}.md`;
-
     const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -474,6 +525,18 @@ function Home() {
         {t("title.suffix")}
       </h1>
 
+      {uploadMode === "folder" && (
+        <div className="file-size">
+          <div>{t("toggleSizeHint")}</div>
+          <button
+            onClick={() => setShowFileSize(!showFileSize)}
+            className={`file-size-button ${showFileSize ? "active" : ""}`}
+          >
+            {t(showFileSize ? "toggleSizeOn" : "toggleSizeOff")}
+          </button>
+        </div>
+      )}
+
       <div className={`checkbox ${uploadMode !== "folder" ? "hidden" : ""}`}>
         <span>{t("hideLabel")}</span>
         {Object.keys(excludedItems).map((item) => (
@@ -490,7 +553,6 @@ function Home() {
             {item}
           </button>
         ))}
-
         <div className="custom-input-wrapper">
           <input
             type="text"
@@ -527,7 +589,6 @@ function Home() {
             </div>
           )}
         </div>
-
         {customExcludesExact.length > 0 && (
           <div className="custom-excludes">
             {customExcludesExact.map((name) => (
