@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { useState, useRef, useEffect } from "react";
 import "../styles/Home.css";
 import PixelCard from "../components/PixelCard/PixelCard";
@@ -100,9 +99,7 @@ function Home() {
       setAllNames(Array.from(uniqueNames));
 
       const activeExcludes = [
-        ...Object.entries(excludedItems)
-          .filter(([_, isActive]) => isActive)
-          .map(([item]) => item),
+        ...Object.keys(excludedItems).filter((key) => excludedItems[key]),
         ...customExcludesExact,
       ];
 
@@ -648,7 +645,7 @@ function Home() {
           <div className="button-group">
             <button onClick={copyToClipboard}>
               <img
-                src={`${process.env.PUBLIC_URL}/images/copy-solid.png`}
+                src={`./images/copy-solid.png`}
                 alt="copy"
                 className="icon"
               />
@@ -656,7 +653,7 @@ function Home() {
             </button>
             <button onClick={downloadMarkdown}>
               <img
-                src={`${process.env.PUBLIC_URL}/images/download-solid.png`}
+                src={`./images/download-solid.png`}
                 alt="download"
                 className="icon"
               />
@@ -664,7 +661,7 @@ function Home() {
             </button>
             <button onClick={downloadImage}>
               <img
-                src={`${process.env.PUBLIC_URL}/images/image-solid.png`}
+                src={`./images/image-solid.png`}
                 alt="image"
                 className="icon"
               />
