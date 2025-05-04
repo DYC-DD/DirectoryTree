@@ -61,7 +61,9 @@ const Footer = () => {
     <footer id="footer" ref={footerRef} className="animated-footer">
       <p className="VisitCount">
         Total website visits:
-        {visitCount !== null ? visitCount.toLocaleString() : " Loading..."}
+        {visitCount !== null
+          ? new Intl.NumberFormat().format(visitCount)
+          : "Loading..."}
       </p>
       <p>© 2025 DYC. All rights reserved.</p>
       <p>
